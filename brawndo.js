@@ -2028,6 +2028,235 @@ Element.Events.domready = {
 
 })();
 
+/*
+---
+
+script: More.js
+
+description: MooTools More
+
+license: MIT-style license
+
+authors:
+- Guillermo Rauch
+- Thomas Aylott
+- Scott Kyle
+
+requires:
+- core:1.2.4/MooTools
+
+provides: [MooTools.More]
+
+...
+*/
+
+MooTools.More = {
+	'version': '1.2.4.3dev',
+	'build': '%build%'
+};
+/*
+---
+
+script: Class.js
+
+description: Contains the Class Function for easily creating, extending, and implementing reusable Classes.
+
+license: MIT-style license.
+
+requires:
+- /$util
+- /Native
+- /Array
+- /String
+- /Function
+- /Number
+- /Hash
+
+provides: [Class]
+
+...
+*/
+
+function Class(params){
+	
+	if (params instanceof Function) params = {initialize: params};
+	
+	var newClass = function(){
+		Object.reset(this);
+		if (newClass._prototyping) return this;
+		this._current = $empty;
+		var value = (this.initialize) ? this.initialize.apply(this, arguments) : this;
+		delete this._current; delete this.caller;
+		return value;
+	}.extend(this);
+	
+	newClass.implement(params);
+	
+	newClass.constructor = Class;
+	newClass.prototype.constructor = newClass;
+
+	return newClass;
+
+};
+
+Function.prototype.protect = function(){
+	this._protected = true;
+	return this;
+};
+
+Object.reset = function(object, key){
+		
+	if (key == null){
+		for (var p in object) Object.reset(object, p);
+		return object;
+	}
+	
+	delete object[key];
+	
+	switch ($type(object[key])){
+		case 'object':
+			var F = function(){};
+			F.prototype = object[key];
+			var i = new F;
+			object[key] = Object.reset(i);
+		break;
+		case 'array': object[key] = $unlink(object[key]); break;
+	}
+	
+	return object;
+	
+};
+
+new Native({name: 'Class', initialize: Class}).extend({
+
+	instantiate: function(F){
+		F._prototyping = true;
+		var proto = new F;
+		delete F._prototyping;
+		return proto;
+	},
+	
+	wrap: function(self, key, method){
+		if (method._origin) method = method._origin;
+		
+		return function(){
+			if (method._protected && this._current == null) throw new Error('The method "' + key + '" cannot be called.');
+			var caller = this.caller, current = this._current;
+			this.caller = current; this._current = arguments.callee;
+			var result = method.apply(this, arguments);
+			this._current = current; this.caller = caller;
+			return result;
+		}.extend({_owner: self, _origin: method, _name: key});
+
+	}
+	
+});
+
+Class.implement({
+	
+	implement: function(key, value){
+		
+		if ($type(key) == 'object'){
+			for (var p in key) this.implement(p, key[p]);
+			return this;
+		}
+		
+		var mutator = Class.Mutators[key];
+		
+		if (mutator){
+			value = mutator.call(this, value);
+			if (value == null) return this;
+		}
+		
+		var proto = this.prototype;
+
+		switch ($type(value)){
+			
+			case 'function':
+				if (value._hidden) return this;
+				proto[key] = Class.wrap(this, key, value);
+			break;
+			
+			case 'object':
+				var previous = proto[key];
+				if ($type(previous) == 'object') $mixin(previous, value);
+				else proto[key] = $unlink(value);
+			break;
+			
+			case 'array':
+				proto[key] = $unlink(value);
+			break;
+			
+			default: proto[key] = value;
+
+		}
+		
+		return this;
+
+	}
+	
+});
+
+Class.Mutators = {
+	
+	Extends: function(parent){
+
+		this.parent = parent;
+		this.prototype = Class.instantiate(parent);
+
+		this.implement('parent', function(){
+			var name = this.caller._name, previous = this.caller._owner.parent.prototype[name];
+			if (!previous) throw new Error('The method "' + name + '" has no parent.');
+			return previous.apply(this, arguments);
+		}.protect());
+
+	},
+
+	Implements: function(items){
+		$splat(items).each(function(item){
+			if (item instanceof Function) item = Class.instantiate(item);
+			this.implement(item);
+		}, this);
+
+	}
+	
+};
+
+/*
+---
+
+script: Class.Binds.js
+
+description: Automagically binds specified methods in a class to the instance of the class.
+
+license: MIT-style license
+
+authors:
+- Aaron Newton
+
+requires:
+- core:1.2.4/Class
+- /MooTools.More
+
+provides: [Class.Binds]
+
+...
+*/
+
+Class.Mutators.Binds = function(binds){
+    return binds;
+};
+
+Class.Mutators.initialize = function(initialize){
+	return function(){
+		$splat(this.Binds).each(function(name){
+			var original = this[name];
+			if (original) this[name] = original.bind(this);
+		}, this);
+		return initialize.apply(this, arguments);
+	};
+};
+
 // for use with Element.addEvent
 Element.NativeEvents.touchstart          = 2;
 Element.NativeEvents.touchmove           = 2;
@@ -2275,174 +2504,6 @@ Element.implement({
     return this.setTranslate3d(useZero ? 0 : null, useZero ? 0 : null, z);
   }
 });
-/*
----
-
-script: Class.js
-
-description: Contains the Class Function for easily creating, extending, and implementing reusable Classes.
-
-license: MIT-style license.
-
-requires:
-- /$util
-- /Native
-- /Array
-- /String
-- /Function
-- /Number
-- /Hash
-
-provides: [Class]
-
-...
-*/
-
-function Class(params){
-	
-	if (params instanceof Function) params = {initialize: params};
-	
-	var newClass = function(){
-		Object.reset(this);
-		if (newClass._prototyping) return this;
-		this._current = $empty;
-		var value = (this.initialize) ? this.initialize.apply(this, arguments) : this;
-		delete this._current; delete this.caller;
-		return value;
-	}.extend(this);
-	
-	newClass.implement(params);
-	
-	newClass.constructor = Class;
-	newClass.prototype.constructor = newClass;
-
-	return newClass;
-
-};
-
-Function.prototype.protect = function(){
-	this._protected = true;
-	return this;
-};
-
-Object.reset = function(object, key){
-		
-	if (key == null){
-		for (var p in object) Object.reset(object, p);
-		return object;
-	}
-	
-	delete object[key];
-	
-	switch ($type(object[key])){
-		case 'object':
-			var F = function(){};
-			F.prototype = object[key];
-			var i = new F;
-			object[key] = Object.reset(i);
-		break;
-		case 'array': object[key] = $unlink(object[key]); break;
-	}
-	
-	return object;
-	
-};
-
-new Native({name: 'Class', initialize: Class}).extend({
-
-	instantiate: function(F){
-		F._prototyping = true;
-		var proto = new F;
-		delete F._prototyping;
-		return proto;
-	},
-	
-	wrap: function(self, key, method){
-		if (method._origin) method = method._origin;
-		
-		return function(){
-			if (method._protected && this._current == null) throw new Error('The method "' + key + '" cannot be called.');
-			var caller = this.caller, current = this._current;
-			this.caller = current; this._current = arguments.callee;
-			var result = method.apply(this, arguments);
-			this._current = current; this.caller = caller;
-			return result;
-		}.extend({_owner: self, _origin: method, _name: key});
-
-	}
-	
-});
-
-Class.implement({
-	
-	implement: function(key, value){
-		
-		if ($type(key) == 'object'){
-			for (var p in key) this.implement(p, key[p]);
-			return this;
-		}
-		
-		var mutator = Class.Mutators[key];
-		
-		if (mutator){
-			value = mutator.call(this, value);
-			if (value == null) return this;
-		}
-		
-		var proto = this.prototype;
-
-		switch ($type(value)){
-			
-			case 'function':
-				if (value._hidden) return this;
-				proto[key] = Class.wrap(this, key, value);
-			break;
-			
-			case 'object':
-				var previous = proto[key];
-				if ($type(previous) == 'object') $mixin(previous, value);
-				else proto[key] = $unlink(value);
-			break;
-			
-			case 'array':
-				proto[key] = $unlink(value);
-			break;
-			
-			default: proto[key] = value;
-
-		}
-		
-		return this;
-
-	}
-	
-});
-
-Class.Mutators = {
-	
-	Extends: function(parent){
-
-		this.parent = parent;
-		this.prototype = Class.instantiate(parent);
-
-		this.implement('parent', function(){
-			var name = this.caller._name, previous = this.caller._owner.parent.prototype[name];
-			if (!previous) throw new Error('The method "' + name + '" has no parent.');
-			return previous.apply(this, arguments);
-		}.protect());
-
-	},
-
-	Implements: function(items){
-		$splat(items).each(function(item){
-			if (item instanceof Function) item = Class.instantiate(item);
-			this.implement(item);
-		}, this);
-
-	}
-	
-};
-
 /*
 ---
 
@@ -2908,7 +2969,8 @@ var MTScrollView = new Class({
     if (this.options.pagingEnabled && !this.customPageSize)
       this.options.pageSize = this.scrollArea.getSize();
 
-    return this.contentSize = { 'x': this.hostingLayerSize.x - this.scrollAreaSize.x, 'y': this.hostingLayerSize.y - this.scrollAreaSize.y };
+    return this.contentSize = { 'x': (this.hostingLayerSize.x - this.scrollAreaSize.x).limit(0,this.hostingLayerSize.x), 
+                                'y': (this.hostingLayerSize.y - this.scrollAreaSize.y).limit(0,this.hostingLayerSize.y) };
   },
   
   // Event Callbacks

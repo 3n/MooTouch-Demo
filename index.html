@@ -18,7 +18,12 @@
     
     <div id="main">
 			<div id="scrollview">
-				
+				<p>Oh hello<p>
+				<p>Oh hello<p>
+				<p>Oh hello<p>
+				<p>Oh hello<p>
+				<p>Oh hello<p>		
+																	
 			</div>
     </div>
     
@@ -28,8 +33,9 @@
 
   <script src="brawndo.js?v=1"></script>
 	<script>
+		$('scrollview').setStyle('height', window.getHeight() - $('scrollview').getTop());
 		window.addEvent('domready', function(){
-			new MTScrollView($('scrollview'));
+			var sv = new MTScrollView($('scrollview'));
 		});
 	</script>
 
