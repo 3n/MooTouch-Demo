@@ -22,7 +22,7 @@ provides: [MooTools, Native, Hash.base, Array.each, $util]
 
 var MooTools = {
 	'version': '1.2.5dev',
-	'build': 'c38d00c73ff71812063dbda33d3c1d39a1d74f5c'
+	'build': '1d0376a21856223db2b81da3d8eda9bb93de0f80'
 };
 
 var Native = function(options){
@@ -3341,4 +3341,173 @@ Number.implement({
     return Math.abs(this);
   }
 });
+
+Element.Events.tap = {
+  tapEventActiveClass : 'tapEventActive',
+  allTapsCanceled : false,
+  
+  cancelAllTaps : function(){
+    Element.Events.tap.allTapsCanceled = true;
+  },
+  
+  onAdd: function(fn){
+    var startScrollY,
+        activeClass = Element.Events.tap.tapEventActiveClass,
+        tapCanceled = false;
+    
+    var cancelTap = function(){
+      tapCanceled = true;
+      this.removeClass(activeClass);
+      this.removeEvent(MT.endEvent, endFn);
+      this.removeEvent(MT.moveEvent, scrollFn);      
+    };
+    var startFn = function(event){
+      Element.Events.tap.allTapsCanceled = false;
+      tapCanceled = false;
+      startScrollY = window.pageYOffset;
+      this.addEvent(MT.endEvent, endFn)
+          .addEvent(MT.moveEvent, scrollFn);
+      (function(){
+        if (!tapCanceled && !Element.Events.tap.allTapsCanceled && this.addClass) 
+          this.addClass(activeClass);
+      }).delay(100, this);
+    };
+    var endFn = function(event){
+      tapCanceled = true;
+      if (this.removeClass) this.removeClass(activeClass);
+      if (Element.Events.tap.allTapsCanceled) 
+        cancelTap.call(this);
+      else
+        fn.call(this, event);
+    };
+    var scrollFn = function(event){
+      var event = MT.getEvent(event.event);
+      var pageX = event.pageX,
+          pageY = event.pageY,
+          left  = this.getLeft(),
+          top   = this.getTop();
+
+      if (startScrollY !== window.pageYOffset 
+          || !(pageX > left && pageX < left + this.getWidth())
+          || !(pageY > top && pageY < top + this.getHeight())){
+            cancelTap.call(this);
+            return;
+      }
+      
+      if (Element.Events.tap.allTapsCanceled) cancelTap.call(this);
+    };
+    
+    this.addEvent(MT.startEvent, startFn);
+    if (Element.Events.swipe) this.addEvent('swipe', cancelTap);
+    
+    var tapAddedEvents = {};
+    tapAddedEvents[fn] = {};
+    tapAddedEvents[fn][MT.startEvent] = startFn;
+    tapAddedEvents[fn][MT.moveEvent] = scrollFn;
+    tapAddedEvents[fn][MT.endEvent] = endFn;
+    
+    this.store('tapAddedEvents', tapAddedEvents);
+  },
+  
+  onRemove: function(fn){
+    if (this.removeClass) this.removeClass(Element.Events.tap.tapEventActiveClass);
+    $H(this.retrieve('tapAddedEvents')[fn]).each(function(v,k){
+      this.removeEvent(k,v);
+    }, this);
+  }
+};
+
+
+Element.Events.tapOut = {
+  onAdd : function(fn) {
+    var tapOut = function(e){
+      if (![e.target].combine(e.target.getParents()).contains(this))
+        fn.call(this, e);
+    }.bind(this);
+    
+    this.getDocument().addEvent('tap', tapOut);
+    this.store('tapOutCallback', tapOut);
+  },
+  onRemove : function(fn) {
+    this.getDocument().removeEvent('tap', this.retrieve('tapOutCallback'));
+  }
+};
+
+Element.Events.touchOut = {
+  base : MT.startEvent,
+  condition : function(event) {
+    event.stopPropagation();
+    return false;
+  },
+  onAdd : function(fn) {
+    this.getDocument().addEvent(MT.startEvent, fn);
+  },
+  onRemove : function(fn) {
+    this.getDocument().removeEvent(MT.startEvent, fn);
+  }
+};
+Element.Events.swipe = {
+  allSwipesCanceled : false,
+  
+  cancelAllSwipes : function(){
+    Element.Events.swipe.allSwipesCanceled = true;
+  },
+  
+  onAdd: function(fn){
+    var startX, startY, active = false;
+
+    var touchStart = function(event){
+      active = true;
+      Element.Events.swipe.allSwipesCanceled = false;
+      var originalEvent = MT.getEvent(event.event);
+      startX = originalEvent.pageX;
+      startY = originalEvent.pageY;
+    };
+    var touchMove = function(event){
+      var originalEvent = MT.getEvent(event.event);      
+      var endX  = originalEvent.pageX,
+          endY  = originalEvent.pageY,          
+          diff  = endX - startX,
+          isLeftSwipe = diff < -1 * Element.Events.swipe.swipeWidth,
+          isRightSwipe = diff > Element.Events.swipe.swipeWidth;
+
+      if (active && !Element.Events.swipe.allSwipesCanceled && (isRightSwipe || isLeftSwipe)          
+          && (event.onlySwipeLeft ? isLeftSwipe : true)
+          && (event.onlySwipeRight ? isRightSwipe : true) ){
+        active = false;
+        fn.call(this, {
+          'direction' : isRightSwipe ? 'right' : 'left', 
+          'startX'    : startX,
+          'endX'      : endX,
+          'startY'    : startY,
+          'endY'      : endY
+        }, event);
+      }
+      
+      if (Element.Events.swipe.cancelVertical
+          && Math.abs(startY - endY) < Math.abs(startX - endX)){
+        return false;
+      }
+    }
+
+    this.addEvent(MT.startEvent, touchStart);    
+    this.addEvent(MT.moveEvent, touchMove);
+    
+    var swipeAddedEvents = {};
+    swipeAddedEvents[fn] = {};
+    swipeAddedEvents[fn][MT.startEvent] = touchStart;
+    swipeAddedEvents[fn][MT.moveEvent]  = touchMove;
+    
+    this.store('swipeAddedEvents', swipeAddedEvents);
+  },
+  
+  onRemove: function(fn){
+    $H(this.retrieve('swipeAddedEvents')[fn]).each(function(v,k){
+      this.removeEvent(k,v);
+    }, this);
+  }
+};
+
+Element.Events.swipe.swipeWidth = 70;
+Element.Events.swipe.cancelVertical = true;
 
