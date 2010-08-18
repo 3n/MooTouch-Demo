@@ -17,11 +17,11 @@
     </header>
     
     <div id="main">
-			<div id="scrollview">
-				<p>
+			<div id="scrollview" class="scrollview">
+				<p><b>
 				A small "framework" to help in building applications with MooTools for touch-
 				capable devices. 
-				</p>
+				</b></p>
 				<p>
 				Currently provides a few helper events for common gestures, some Element
 				extensions for getting and setting the translate3d property and a top-
@@ -31,6 +31,12 @@
 				All code works on old-school "desktop" browsers as well, as "mouse" events
 				are handled the same as touch events.
 				</p>				
+				
+				<ul class="section">
+					<li id="tap">Tap Me</li>
+					<li id="swipe">Swipe Me</li>
+				</ul>
+				
 			</div>
     </div>
     
@@ -43,6 +49,12 @@
 		$('scrollview').setStyle('height', window.getHeight() - $('scrollview').getTop() - 12);
 		window.addEvent('domready', function(){
 			var sv = new MTScrollView($('scrollview'));
+		});
+		$('tap').addEvent('tap', function(){
+			console.log('tap');
+		});
+		$('swipe').addEvent('swipe', function(){
+			console.log('swipe');
 		});
 	</script>
 
