@@ -22,7 +22,7 @@ provides: [MooTools, Native, Hash.base, Array.each, $util]
 
 var MooTools = {
 	'version': '1.2.5dev',
-	'build': 'cd2a678749ce7840b32922907c8adee034679051'
+	'build': '29154eff1de7700003789cd2773cd6aff6038ad1'
 };
 
 var Native = function(options){
@@ -3229,7 +3229,7 @@ var MTScrollView = new Class({
     
     this.options.axis.each(function(axis){
       if (this.indicators[axis] && this.options['showScrollIndicator' + axis.toUpperCase()]){
-        var dim = this.scrollAreaSize[axis] * (this.scrollAreaSize[axis] / this.hostingLayerSize[axis]);
+        var dim = this.scrollAreaSize[axis] * (this.scrollAreaSize[axis] / this.hostingLayerSize[axis]).limit(0,1);
         var pos = (this.scrollAreaSize[axis] - dim) * (this.currentScroll[axis] / this.contentSize[axis]);
         var scale = 1,
             scaleDiff = 0;
