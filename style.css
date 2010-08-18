@@ -1,16 +1,61 @@
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, font, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-size: 100%;
+	vertical-align: baseline;
+	background: transparent;
+}
+
+
+
 body {
   font-family:Helvetica;
+  color:#333;
+	background-color: #dfe2e7;
 }
 
 h1 {
+  margin:12px 10px;
+  text-shadow:0 1px rgba(255,255,255,0.8);
+  font-size:130%;
+  color:#393939;
+}
+
+p {
+  margin:12px 0;
+  padding:0 12px;
+  line-height:1.3em;
+  font-size:90%;
+}
+
+
+#container {
+  padding:0 12px;
 }
 
 #scrollview {
   width:100%;
   max-width:500px;
-  background:green;
 	position:relative;
   overflow: hidden;
+  -webkit-border-radius: 8px;
+  border:1px solid #ccc;
+  
+	background: -webkit-gradient(linear, 0% 0%, 0% 1%, from(rgba(0,0,0,0.08)), to(transparent));
+	background-color: rgba(255,2555,255,0.5);
+	-webkit-border-radius: 8px;
+	border: 1px solid #b6b9bd;
+	-webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.8);
 }
 
 

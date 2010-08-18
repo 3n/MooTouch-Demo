@@ -18,12 +18,19 @@
     
     <div id="main">
 			<div id="scrollview">
-				<p>Oh hello<p>
-				<p>Oh hello<p>
-				<p>Oh hello<p>
-				<p>Oh hello<p>
-				<p>Oh hello<p>		
-																	
+				<p>
+				A small "framework" to help in building applications with MooTools for touch-
+				capable devices. 
+				</p>
+				<p>
+				Currently provides a few helper events for common gestures, some Element
+				extensions for getting and setting the translate3d property and a top-
+				of-the-line, best-of-breed native iOS scrolling class.
+				</p>
+				<p>
+				All code works on old-school "desktop" browsers as well, as "mouse" events
+				are handled the same as touch events.
+				</p>				
 			</div>
     </div>
     
@@ -33,7 +40,7 @@
 
   <script src="brawndo.js?v=1"></script>
 	<script>
-		$('scrollview').setStyle('height', window.getHeight() - $('scrollview').getTop());
+		$('scrollview').setStyle('height', window.getHeight() - $('scrollview').getTop() - 12);
 		window.addEvent('domready', function(){
 			var sv = new MTScrollView($('scrollview'));
 		});
