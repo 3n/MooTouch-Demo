@@ -33,8 +33,8 @@
 				</p>				
 				
 				<ul class="section">
-					<li id="tap">Tap Me</li>
-					<li id="swipe">Swipe Me</li>
+					<li id="tap">Tap Me<span>0</span></li>
+					<li id="swipe">Swipe Me<span>0 / 0</span></li>
 				</ul>
 				
 			</div>
@@ -46,15 +46,30 @@
 
   <script src="brawndo.js?v=1"></script>
 	<script>
+		Element.implement({
+		  addClassForDuration: function(className, duration){
+		    this.addClass(className);
+		    this.removeClass.delay(duration, this, className);
+		  }
+		});
+	
 		$('scrollview').setStyle('height', window.getHeight() - $('scrollview').getTop() - 12);
 		window.addEvent('domready', function(){
 			var sv = new MTScrollView($('scrollview'));
 		});
+		
+		var tap_total = 0,
+				swipe_left_total = 0,
+				swipe_right_total = 0;				
+				
 		$('tap').addEvent('tap', function(){
-			console.log('tap');
+			this.getElement('span').set('html', ++tap_total)
+					.addClassForDuration('pop', 200);
 		});
-		$('swipe').addEvent('swipe', function(){
-			console.log('swipe');
+		$('swipe').addEvent('swipe', function(e){
+			e.direction === 'right' ? swipe_right_total++ : swipe_left_total++;
+			this.getElement('span').set('html', swipe_left_total + ' / ' + swipe_right_total)
+					.addClassForDuration('pop', 200);
 		});
 	</script>
 
