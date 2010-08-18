@@ -37,6 +37,46 @@
 					<li id="swipe">Swipe Me<span>0 / 0</span></li>
 				</ul>
 				
+				<p><b>Scrolling</b></p>
+				
+				<p>
+					If you hadn't already noticed, you can scroll the contents of this box like a native
+					iOS application. The indicators are on by default, but can be turned off. In fact, all
+					aspects of the interaction and animation can be customized.
+				</p>
+				
+				<p>
+					Here is an example of horizontal-only scrolling, which is locked to a grid (pagingEnabled:true),
+					simulating a swipe-to-navigate interface like the Photos app.
+		    </p>
+				
+				<div id="horizontal-scroll" class="section">
+				</div>
+				
+				<p class="fake">
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+				</p>
+				
+				<p class="fake">
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+				</p>
+				
+				<p class="fake">
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+				</p>
+				
+				<p class="fake">
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+				</p>
+				
+				<p class="fake">
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+				</p>
+				
+				<p class="fake">
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+				</p>
+				
 			</div>
     </div>
     
@@ -46,6 +86,7 @@
 
   <script src="brawndo.js?v=1"></script>
 	<script>
+	
 		Element.implement({
 		  addClassForDuration: function(className, duration){
 		    this.addClass(className);
@@ -53,24 +94,44 @@
 		  }
 		});
 	
-		$('scrollview').setStyle('height', window.getHeight() - $('scrollview').getTop() - 12);
 		window.addEvent('domready', function(){
-			var sv = new MTScrollView($('scrollview'));
+			$('scrollview').setStyle('height', window.getHeight() - $('scrollview').getTop() - 12);
+
+			var tap_total = 0,
+					swipe_left_total = 0,
+					swipe_right_total = 0;				
+
+			$('tap').addEvent('tap', function(){
+				this.getElement('span').set('html', ++tap_total)
+						.addClassForDuration('pop', 200);
+			});
+			$('swipe').addEvent('swipe', function(e){
+				e.direction === 'right' ? swipe_right_total++ : swipe_left_total++;
+				this.getElement('span').set('html', swipe_left_total + ' / ' + swipe_right_total)
+						.addClassForDuration('pop', 200);
+			});
+
+			var width = $('horizontal-scroll').getWidth(),
+			 		horizontal_pieces = [],
+					colors = ['#FC5252','#52CC74','#00AFE6','#FF0094','#FDFE57','#333'];
+
+			(10).times(function(){
+				horizontal_pieces.push(new Element('div').setStyles({
+					'width' : width,
+					'background' : colors.getRandom()
+				}));
+			});
+
+			$('horizontal-scroll').grab(new Element('div').setStyle('width', width * 10).adopt(horizontal_pieces));
+
+			new MTScrollView('horizontal-scroll', { 
+				axis:['x'], 
+				pagingEnabled: true
+			});
+			
+			sv = new MTScrollView($('scrollview'));
 		});
-		
-		var tap_total = 0,
-				swipe_left_total = 0,
-				swipe_right_total = 0;				
-				
-		$('tap').addEvent('tap', function(){
-			this.getElement('span').set('html', ++tap_total)
-					.addClassForDuration('pop', 200);
-		});
-		$('swipe').addEvent('swipe', function(e){
-			e.direction === 'right' ? swipe_right_total++ : swipe_left_total++;
-			this.getElement('span').set('html', swipe_left_total + ' / ' + swipe_right_total)
-					.addClassForDuration('pop', 200);
-		});
+
 	</script>
 
 </body>

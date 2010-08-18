@@ -135,3 +135,28 @@ p {
 .section li span.pop {
   -webkit-transform: scale(1.5);
 }
+
+
+#horizontal-scroll {
+  position:relative;
+  overflow:hidden; 
+  -webkit-border-radius:0;
+  border:none;
+  -webkit-box-shadow:none;
+}
+
+#horizontal-scroll div {
+  float:left;
+}
+
+#horizontal-scroll div div {
+  height:100px;  
+  background:green;
+  display:inline-block;
+  float:left;
+}
+
+
+p.fake {
+  color:#bbb;
+}
