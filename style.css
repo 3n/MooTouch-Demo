@@ -159,3 +159,7 @@ p {
 p.fake {
   color:#bbb;
 }
+
+p:last-child {
+  padding-bottom:12px;
+}
