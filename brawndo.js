@@ -22,7 +22,7 @@ provides: [MooTools, Native, Hash.base, Array.each, $util]
 
 var MooTools = {
 	'version': '1.2.5dev',
-	'build': '1c8f0fab57e1cea655591d2856a6704653912531'
+	'build': '214fbb0e533fb5a6882452a9cd79c2be7fb93312'
 };
 
 var Native = function(options){
@@ -2919,7 +2919,7 @@ var MTScrollView = new Class({
     this.scrollArea = document.id(scrollArea);
     
     this.hostingLayer = new Element('div').inject(this.scrollArea, 'top');
-    this.hostingLayer.adopt(this.hostingLayer.getAllNext())
+    this.hostingLayer.adopt(this.hostingLayer.getAllNext());
     
     this.options.axis.each(function(axis){
       this.indicators[axis] = new Element('div', {
@@ -3002,7 +3002,7 @@ var MTScrollView = new Class({
     var deltaPoint = touch_position.minus(this.startTouchPosition);
 
     if (!this.isDragging) {      
-      if (this.options.axis.some(function(axis){ return deltaPoint[axis].abs() >= this.options.minimumTrackingForDrag }.bind(this))){
+      if (this.options.axis.some(function(axis){ return deltaPoint[axis].abs() >= this.options.minimumTrackingForDrag; }.bind(this))){
         this.fireEvent('willBeginDragging', this);
         this.isDragging = true;
         this.firstDrag = true;
@@ -3257,8 +3257,9 @@ var MTScrollView = new Class({
         else
           this.indicators[axis].setStyle('-webkit-transition-duration', 0);
 
-        this.indicators[axis].setStyle('webkitTransform', 'scale' + axis.toUpperCase() + '(' + scale + ')');        
-        this.indicators[axis]['setTranslate' + axis.toUpperCase()](pos + scaleDiff);
+        if (this.options.indicatorHeightEffect)
+          this.indicators[axis].setStyle('webkitTransform', 'scale' + axis.toUpperCase() + '(' + scale + ')');        
+        this.indicators[axis]['setTranslate' + axis.toUpperCase()](pos + (this.options.indicatorHeightEffect ? scaleDiff : 0));
       }
     }, this);
   },
