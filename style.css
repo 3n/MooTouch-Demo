@@ -49,17 +49,18 @@ p {
 
 #container {
   padding:0 12px;
+  max-width:500px;
+  margin:0 auto;
 }
 
 .scrollview {
   width:100%;
-  max-width:500px;
 	position:relative;
   overflow: hidden;
   -webkit-border-radius: 8px;
   border:1px solid rgba(0,0,0,0.13);
   -webkit-box-shadow:0 1px 1px white;
-  background:rgba(0,0,0,0.02);
+  background:rgba(0,0,0,0.04);
   background:rgba(255,255,255,0.3);  
 }
 
