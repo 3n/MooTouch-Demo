@@ -2906,11 +2906,9 @@ var MTScrollView = new Class({
     bottomCancelHeight : 20
   },
   
-  currentScroll : new MTPoint(),
   isDragging : false,
   isDecelerating : false,
   scrollEnabled : true,
-  indicators : $H(),
   touchesBeganFired : false,
   
   initialize: function(scrollArea, options){
@@ -2919,10 +2917,12 @@ var MTScrollView = new Class({
       this.customPageSize = true;
     
     this.scrollArea = document.id(scrollArea);
+    this.currentScroll = new MTPoint();
     
     this.hostingLayer = new Element('div').inject(this.scrollArea, 'top');
     this.hostingLayer.adopt(this.hostingLayer.getAllNext());
     
+    this.indicators = $H();
     this.options.axis.each(function(axis){
       this.indicators[axis] = new Element('div', {
         'class': this.options.indicatorClass + ' ' + axis + '-axis-' + this.options.indicatorClass
